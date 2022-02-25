@@ -6,29 +6,38 @@ namespace PlayGround
 {
     internal class Program
     {
+
         static void Main(string[] args)
         {
 
+            /*            
+             Get all test  attributes
+             */
             var testSuites = from d in Assembly.GetExecutingAssembly().GetTypes()
                              where d.GetCustomAttributes().Any(a => a is TestAttribute)
                              select d;
-                             ;
-            Console.WriteLine(testSuites?.FirstOrDefault().Name);
 
-
-
-            foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
+            foreach (Type attributeType in testSuites)
             {
+                /*            
+             Get all method attributes
+             */
+                var getTestMethods = from d in attributeType.GetMethods()
+                                     where d.GetCustomAttributes().Any(m => m is TestMethodAttribute)
+                                     select d;
 
-                foreach (Attribute attribute in type.GetCustomAttributes())
+                /* dynamically instantiate the object*/
+                var createInstance = Activator.CreateInstance(attributeType);
+
+                foreach (MethodInfo methodInfo in getTestMethods)
                 {
-                    if (attribute is TestAttribute)
-                    {
-                        Console.WriteLine($"{type.Name} is a TestAttribute");
-                    }
+                    /* dynamically call the methods*/
+                    methodInfo.Invoke(createInstance, new object[0]);
                 }
-               // 
+
+
             }
+
         }
     }
 
@@ -36,14 +45,34 @@ namespace PlayGround
     {
 
     }
+
+    public class TestMethodAttribute : Attribute
+    {
+
+    }
     [TestAttribute]
     public class MyTestAttribute
     {
+        public void HelperMethod()
+        {
 
+        }
+        [TestMethodAttribute]
+        public void Method1()
+        {
+            Console.WriteLine("Method 1 works");
+            HelperMethod();
+        }
+        [TestMethodAttribute]
+        public void Method2()
+        {
+            Console.WriteLine("Method 2 works");
+            HelperMethod();
+        }
     }
 
 
 
 
-    
+
 }

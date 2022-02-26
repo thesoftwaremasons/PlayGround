@@ -1,30 +1,40 @@
 ﻿using System;
 using System.Reflection;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
 namespace PlayGround
 {
-    [Me("25","Femi")]
+  
      class Program
     {
 
         static void Main(string[] args)
         {
-
-             typeof(Program).GetCustomAttributes();
+            var betsy = new Cow
+            {
+                Name = "Femi",
+                Weight = 35,
+            };
+            var formatter = new BinaryFormatter();
+            var stream = new MemoryStream();
+         
+            formatter.Serialize(stream, betsy);
+            stream.Seek(0, SeekOrigin.Begin);
+            var betsyClone= formatter.Deserialize(stream) as Cow;
+            Console.WriteLine(betsyClone.Name);
+            Console.WriteLine(betsyClone.Weight);
 
         }
     }
 
 
-    class MeAttribute : Attribute
+    [Serializable]
+    class Cow
     {
-        public MeAttribute(string value, string secondValue)
-        {
-            Console.WriteLine("I Work");
-            Console.WriteLine(value);
-            Console.WriteLine(secondValue);
-        }
+        public int Weight { get; set; }
+        public string Name { get; set; }
     }
 
 
